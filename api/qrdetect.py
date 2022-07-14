@@ -1,12 +1,12 @@
 import cv2
 import numpy as np
 import tensorflow as tf
-from PIL import Image
-from pyzbar.pyzbar import decode
 from pyzbar import pyzbar
-import glob
+# from pyzbar.pyzbar import decode
+# import glob
+# from PIL import Image
 
-model_path = 'model.tflite'
+# model_path = 'qrmodel.tflite'
 
 # # Load the labels into a list
 # classes = ['QR_CODE']
@@ -49,7 +49,7 @@ def detect_objects(interpreter, image, threshold):
       results.append(result)
   return results
 
-def run_odt_and_draw_results(image_path, interpreter, threshold=0.9):
+def run_odt_and_draw_results(image_path, interpreter, threshold=0.5):
   """Run object detection on the input image and draw the detection results"""
   # Load the input shape required by the model
   _, input_height, input_width, _ = interpreter.get_input_details()[0]['shape']
@@ -79,7 +79,9 @@ def run_odt_and_draw_results(image_path, interpreter, threshold=0.9):
 
     # Draw the bounding box and label on the image
     # color = [int(c) for c in COLORS[class_id]]
-    boundb = cv2.rectangle(original_image_np, (xmin, ymin), (xmax, ymax), color, 2)
+    # boundb = cv2.rectangle(original_image_np, (xmin, ymin), (xmax, ymax), color, 2)
+    boundb = cv2.rectangle(original_image_np, (xmin, ymin), (xmax, ymax), (0,255,102), 2)
+    
     crop = boundb[ymin:ymax, xmin:xmax]
     
     con = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
@@ -87,6 +89,7 @@ def run_odt_and_draw_results(image_path, interpreter, threshold=0.9):
     sharpened1 = cv2.addWeighted(con, 1.5, gaussian_blur, -0.5, 0)
 
     cv2.imwrite("cropQR/"+'crop.jpg', sharpened1)
+    # cv2.imwrite("cropQR/"+'crop.jpg', crop)
     
     # read the QRCODE image
     # qrc = cv2.imread(crop)
@@ -94,7 +97,9 @@ def run_odt_and_draw_results(image_path, interpreter, threshold=0.9):
     # initialize the cv2 QRCode detector
     # detector = cv2.QRCodeDetector()
     # # detect and decode
+    # data, vertices_array, binary_qrcode = detector.detectAndDecode(qrc)
     # data, vertices_array, binary_qrcode = detector.detectAndDecode(crop)
+    
     # # if there is a QR code
     # # print the data
     # if vertices_array is not None:
@@ -102,49 +107,37 @@ def run_odt_and_draw_results(image_path, interpreter, threshold=0.9):
     #     print(data)
     # else:
     #     print("There was some error")
+    
     # barcodes = pyzbar.decode(crop)
+    
     for barcode in pyzbar.decode(sharpened1):
         barcodeData = barcode.data.decode("utf-8")
         barcodeType = barcode.type
-        print(barcodeData, '\n', barcodeType)
-    # for barcode in decode(crop):
-    #     print(barcode.data)
-    #     myData = barcode.data.decode('utf-8')
-    #     print(myData)
-    #     if myData:
-    #         pts = np.array([barcode.polygon], np.int32)
-    #         pts = pts.reshape((-1,1,2))
-    #         cv2.polylines(crop,[pts], True,(255,0,255), 3)
-        
-    # Make adjustments to make the label visible for all objects
-    # y = ymin - 15 if ymin - 15 > 15 else ymin + 15
-    # label = "{}: {:.0f}%".format(classes[class_id], obj['score'] * 100)
-    # cv2.putText(original_image_np, label, (xmin, y),
-    #     cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
+        print("Decoded_Data_:", barcodeData, '\n', barcodeType)
+          
   # Return the final image
   original_uint8 = original_image_np.astype(np.uint8)
   return original_uint8
 
-DETECTION_THRESHOLD = 0.9
+# DETECTION_THRESHOLD = 0.5
 
 # i=glob.glob('Crop/*.jpg')
 # TEMP_FILE = i[-1]
-TEMP_FILE = glob.glob('Crop/*.jpg')
+# TEMP_FILE = glob.glob('Crop/*.jpg')
 
-# TEMP_FILE = 'edge_screenshot_12.07.2022.png'   
-                                                       
+# TEMP_FILE = 'Crop/crop_1657707298127.jpg'
+
 # Load the TFLite model
-interpreter = tf.lite.Interpreter(model_path=model_path)
-interpreter.allocate_tensors()
+# interpreter = tf.lite.Interpreter(model_path=model_path)
+# interpreter.allocate_tensors()
 
 # Run inference and draw detection result on the local copy of the original file
-detection_result_image = run_odt_and_draw_results(
-    TEMP_FILE,
-    interpreter,
-    threshold=DETECTION_THRESHOLD
-)
+# detection_result_image = run_odt_and_draw_results(
+#     TEMP_FILE,
+#     interpreter,
+#     threshold=DETECTION_THRESHOLD
+# )
 
-# Show the detection result
-image  = Image.fromarray(detection_result_image)
+# # Show the detection result
+# image  = Image.fromarray(detection_result_image)
 # image.show()
