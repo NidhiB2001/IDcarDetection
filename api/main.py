@@ -15,7 +15,6 @@ from PIL import Image
 # from datetime import datetime
 # import glob
 # import qrdetect
-# import keras_ocr
 import pytesseract
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
@@ -26,8 +25,6 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 # sheet = file.open("Number plate Recognition").get_worksheet(15)
 # header = ["Date", "Number plate"]
 # sheet.insert_row(header)
-
-# pipeline = keras_ocr.pipeline.Pipeline()
 
 def allowed_file(filename):
     print("in allowed file''''''''''", filename)
@@ -56,7 +53,7 @@ def upload_file():
             resp = jsonify({"filename": filename, "Status":200})
             print("resp!!!!!!!!!!!!!!!",resp)
             resp.status_code = 200
-            imag='Crop/'+filename
+            imag = 'Crop/'+filename
             # print('image"""""""""',image)
             
             # qrdetect.image
@@ -75,19 +72,7 @@ def upload_file():
             
             # now = datetime.now()
             # dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-            # try:
-            #     images = [
-            #         keras_ocr.tools.read(img) for img in ['Crop/'+im]
-            #     ]
-            #     prediction_groups = pipeline.recognize(images)
-
-            #     for i in prediction_groups:
-            #         for text, box in i:
-            #             print("text :::::::::", text)
-            # except:
-            #     pass
-            # sheet.update('B'+str(l),[tlist])
-            
+                  
             model_path = 'model.tflite'
 
             def preprocess_image(image_path, input_size):
@@ -155,7 +140,7 @@ def upload_file():
                     # gaussian_blur = cv2.GaussianBlur(con, (7,7), 2)
                     # sharpened1 = cv2.addWeighted(con, 1.5, gaussian_blur, -0.5, 0)
                     try:
-                        cv2.imwrite("cropQR/"+'crop.jpg', crop)
+                        # cv2.imwrite("cropQR/"+'crop.jpg', crop)
                     
                     # read the QRCODE image
                     # qrc = cv2.imread(crop)
@@ -201,7 +186,6 @@ def upload_file():
                 interpreter,
                 threshold=DETECTION_THRESHOLD
             )
-            # Show the detection result
             image = Image.fromarray(detection_result_image)
             return resp   
     return 'file' 
